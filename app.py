@@ -1,9 +1,9 @@
-
 import os
 import json
 import requests
 
 from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
 from langchain_core.tools import tool
@@ -349,20 +349,165 @@ def chat(request: UserQuery):
 
 
 # ============================================
-# HOME
+# HOME - SIMPLE CHATBOT UI
 # ============================================
 
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 def home():
 
-    return {
-        "message": "Smart Travel Agent is running",
-        "tools": [
-            "Weather",
-            "Places and Hotels",
-            "Currency Converter"
-        ]
+    return """
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>Smart Travel Agent</title>
+</head>
+
+<body>
+
+    <h2>🌍 Smart Travel Agent</h2>
+
+    <p>Ask me about weather, hotels, tourist places, or currency conversion.</p>
+
+    <hr>
+
+    <div id="chat"></div>
+
+    <br>
+
+    <input
+        type="text"
+        id="message"
+        placeholder="Ask about your travel..."
+        style="width: 400px;"
+    >
+
+    <button onclick="sendMessage()">
+        Send
+    </button>
+
+
+<script>
+
+async function sendMessage() {
+
+    const input = document.getElementById("message");
+
+    const message = input.value.trim();
+
+    if (!message) {
+        return;
     }
+
+    const chat = document.getElementById("chat");
+
+
+    // Show user message
+
+    chat.innerHTML +=
+        "<p><b>You:</b> " +
+        message +
+        "</p>";
+
+
+    // Clear input
+
+    input.value = "";
+
+
+    // Show thinking message
+
+    chat.innerHTML +=
+        "<p><b>Agent:</b> Thinking...</p>";
+
+
+    try {
+
+        const response = await fetch("/chat", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                query: message
+            })
+
+        });
+
+
+        const data = await response.json();
+
+
+        const messages =
+            chat.getElementsByTagName("p");
+
+
+        const lastMessage =
+            messages[messages.length - 1];
+
+
+        if (data.response) {
+
+            lastMessage.innerHTML =
+                "<b>Agent:</b> " +
+                data.response;
+
+        }
+
+        else {
+
+            lastMessage.innerHTML =
+                "<b>Agent:</b> Error: " +
+                (data.error || "Something went wrong.");
+
+        }
+
+    }
+
+    catch (error) {
+
+        const messages =
+            chat.getElementsByTagName("p");
+
+
+        messages[messages.length - 1].innerHTML =
+            "<b>Agent:</b> Connection error.";
+
+    }
+
+}
+
+
+// ============================================
+// PRESS ENTER TO SEND
+// ============================================
+
+document
+    .getElementById("message")
+    .addEventListener(
+        "keydown",
+
+        function(event) {
+
+            if (event.key === "Enter") {
+
+                sendMessage();
+
+            }
+
+        }
+    );
+
+</script>
+
+</body>
+
+</html>
+"""
 
 
 # ============================================
