@@ -11,9 +11,8 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.agents import create_agent
 
 
-# ============================================
+
 # FASTAPI APP
-# ============================================
 
 app = FastAPI(
     title="Smart Travel Agent",
@@ -21,9 +20,9 @@ app = FastAPI(
 )
 
 
-# ============================================
+
 # API KEY
-# ============================================
+
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
@@ -31,9 +30,9 @@ if not GEMINI_API_KEY:
     raise RuntimeError("GEMINI_API_KEY is not configured.")
 
 
-# ============================================
+
 # TOOL 1 - WEATHER
-# ============================================
+
 
 @tool
 def get_weather(city: str) -> str:
@@ -91,9 +90,9 @@ def get_weather(city: str) -> str:
         return f"Weather error: {str(e)}"
 
 
-# ============================================
+
 # TOOL 2 - PLACES AND HOTELS
-# ============================================
+
 
 @tool
 def search_places_and_hotels(
@@ -195,9 +194,9 @@ def search_places_and_hotels(
         })
 
 
-# ============================================
+
 # TOOL 3 - CURRENCY CONVERTER
-# ============================================
+
 
 @tool
 def convert_currency(
@@ -250,9 +249,8 @@ def convert_currency(
         return f"Currency conversion error: {str(e)}"
 
 
-# ============================================
+
 # THREE TOOLS
-# ============================================
 
 travel_tools = [
     get_weather,
@@ -261,9 +259,8 @@ travel_tools = [
 ]
 
 
-# ============================================
+
 # GEMINI LLM
-# ============================================
 
 llm = ChatGoogleGenerativeAI(
     model="gemma-4-31b-it",
@@ -272,9 +269,8 @@ llm = ChatGoogleGenerativeAI(
 )
 
 
-# ============================================
+
 # SMART TRAVEL AGENT
-# ============================================
 
 smart_travel_agent = create_agent(
     model=llm,
@@ -300,17 +296,16 @@ smart_travel_agent = create_agent(
 )
 
 
-# ============================================
+
 # REQUEST MODEL
-# ============================================
+
 
 class UserQuery(BaseModel):
     query: str
 
 
-# ============================================
+
 # CHAT ENDPOINT
-# ============================================
 
 @app.post("/chat")
 def chat(request: UserQuery):
@@ -348,9 +343,8 @@ def chat(request: UserQuery):
         }
 
 
-# ============================================
+
 # HOME - SIMPLE CHATBOT UI
-# ============================================
 
 @app.get("/", response_class=HTMLResponse)
 def home():
@@ -482,9 +476,8 @@ async function sendMessage() {
 }
 
 
-// ============================================
+
 // PRESS ENTER TO SEND
-// ============================================
 
 document
     .getElementById("message")
@@ -510,9 +503,8 @@ document
 """
 
 
-# ============================================
+
 # HEALTH CHECK
-# ============================================
 
 @app.get("/health")
 def health():
